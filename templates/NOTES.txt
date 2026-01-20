@@ -1,0 +1,31 @@
+Hytale Server has been deployed!
+
+1. Get the game server connection address:
+{{- if contains "LoadBalancer" .Values.service.type }}
+   NOTE: It may take a few minutes for the LoadBalancer IP to be available.
+         You can watch its status by running:
+         kubectl get --namespace {{ .Release.Namespace }} svc -w {{ include "hytale.fullname" . }}
+
+   export SERVICE_IP=$(kubectl get svc --namespace {{ .Release.Namespace }} {{ include "hytale.fullname" . }} --template "{{"{{ range (index .status.loadBalancer.ingress 0) }}{{.}}{{ end }}"}}")
+   echo "Connect to: $SERVICE_IP:{{ .Values.service.port }} (UDP)"
+{{- else if contains "NodePort" .Values.service.type }}
+   export NODE_PORT=$(kubectl get --namespace {{ .Release.Namespace }} -o jsonpath="{.spec.ports[0].nodePort}" services {{ include "hytale.fullname" . }})
+   export NODE_IP=$(kubectl get nodes --namespace {{ .Release.Namespace }} -o jsonpath="{.items[0].status.addresses[0].address}")
+   echo "Connect to: $NODE_IP:$NODE_PORT (UDP)"
+{{- else if contains "ClusterIP" .Values.service.type }}
+   The service is only accessible within the cluster. To connect from outside, consider using a LoadBalancer or NodePort service type.
+
+   For port-forwarding (testing only):
+   kubectl --namespace {{ .Release.Namespace }} port-forward svc/{{ include "hytale.fullname" . }} {{ .Values.service.port }}:{{ .Values.service.port }}
+{{- end }}
+
+2. To attach to the server console:
+   export POD_NAME=$(kubectl get pods --namespace {{ .Release.Namespace }} -l "app.kubernetes.io/name={{ include "hytale.name" . }},app.kubernetes.io/instance={{ .Release.Name }}" -o jsonpath="{.items[0].metadata.name}")
+   kubectl --namespace {{ .Release.Namespace }} attach -it $POD_NAME -c {{ .Chart.Name }}
+
+{{- if .Values.fileBrowser.enabled }}
+
+3. File Browser is enabled for managing server files:
+   kubectl --namespace {{ .Release.Namespace }} port-forward svc/{{ include "hytale.fullname" . }}-filebrowser {{ .Values.fileBrowser.service.port }}:{{ .Values.fileBrowser.service.port }}
+   Then visit: http://localhost:{{ .Values.fileBrowser.service.port }}
+{{- end }}

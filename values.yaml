@@ -1,0 +1,78 @@
+# Default values for hytale.
+
+image:
+  repository: brodino96/hytale-server
+  pullPolicy: IfNotPresent
+  tag: "latest"
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+# Hytale server environment variables
+env:
+  JAVA_OPTS: "-Xmx2G"
+  UPDATE_ON_STARTUP: "true"
+  PATCHLINE: "release"
+
+# Persistent storage for server data
+persistence:
+  enabled: true
+  storageClass: ""
+  accessMode: ReadWriteOnce
+  size: 10Gi
+  existingClaim: ""
+
+# File browser sidecar for managing server files
+fileBrowser:
+  enabled: false
+  image:
+    repository: hurlenko/filebrowser
+    tag: "latest"
+    pullPolicy: IfNotPresent
+  service:
+    type: ClusterIP
+    port: 8080
+
+podAnnotations: {}
+podLabels: {}
+
+podSecurityContext:
+  fsGroup: 1000
+
+securityContext:
+  allowPrivilegeEscalation: false
+  capabilities:
+    drop:
+      - ALL
+  seccompProfile:
+    type: RuntimeDefault
+
+# Service for the game server
+service:
+  type: LoadBalancer
+  port: 5520
+  protocol: UDP
+
+resources: {}
+  # limits:
+  #   cpu: 2000m
+  #   memory: 4Gi
+  # requests:
+  #   cpu: 1000m
+  #   memory: 2Gi
+
+livenessProbe: {}
+readinessProbe: {}
+
+# Additional volumes (beyond the data PVC)
+volumes: []
+
+# Additional volumeMounts (beyond the data mount)
+volumeMounts: []
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}

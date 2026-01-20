@@ -1,0 +1,33 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "hytale.fullname" . }}
+  labels:
+    {{- include "hytale.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+    - port: {{ .Values.service.port }}
+      targetPort: game
+      protocol: {{ .Values.service.protocol | default "UDP" }}
+      name: game
+  selector:
+    {{- include "hytale.selectorLabels" . | nindent 4 }}
+---
+{{- if .Values.fileBrowser.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "hytale.fullname" . }}-filebrowser
+  labels:
+    {{- include "hytale.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.fileBrowser.service.type }}
+  ports:
+    - port: {{ .Values.fileBrowser.service.port }}
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    {{- include "hytale.selectorLabels" . | nindent 4 }}
+{{- end }}
