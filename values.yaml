@@ -11,7 +11,7 @@ fullnameOverride: ""
 
 # Hytale server environment variables
 env:
-  JAVA_OPTS: "-Xmx2G"
+  JAVA_OPTS: "-Xmx6G -Xms4G -XX:+UseG1GC -XX:AOTCache=/data/Server/HytaleServer.aot -Xlog:aot"
   UPDATE_ON_STARTUP: "true"
   PATCHLINE: "release"
 
